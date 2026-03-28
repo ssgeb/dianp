@@ -29,7 +29,7 @@
 
 - 现象：推送时报 `Recv failure: Connection was reset`
 - 原因：Git 通过本地代理 `127.0.0.1:7890` 连接 GitHub，TLS 握手阶段被重置
-- 解决方法：在推送命令前临时清空代理变量，并显式关闭 Git 的代理配置
+- 解决方法：先尝试清空代理变量直接连接，随后改为保留代理但强制 Git 使用 `HTTP/1.1`
 
 ### 2. GitHub 远端历史和本地历史不是同一条线
 
@@ -39,16 +39,10 @@
 ## 最终推送命令
 
 ```powershell
-$env:HTTP_PROXY=''
-$env:HTTPS_PROXY=''
-$env:ALL_PROXY=''
-$env:http_proxy=''
-$env:https_proxy=''
-$env:all_proxy=''
-git -c http.proxy= -c https.proxy= push github master:main --force-with-lease
+git -c http.version=HTTP/1.1 push github master:main --force-with-lease
 ```
 
 ## 结果
 
-- GitHub `main` 已更新到本地提交 `0054e50`
+- GitHub `main` 已更新到本地提交 `e09b4d4`
 - 仓库中同时包含前端静态项目和后端 `hm-dianping/` 项目
